@@ -9,6 +9,12 @@
             "roleArn": "arn:aws:iam::853249515104:role/AgentCore-CustomerSupport-ApplicationAgentCustomerS-gDK4JeelpDHb"
           }
         },
+        "memories": {
+          "SharedMemory": {
+            "memoryId": "CustomerSupport_SharedMemory-jEAscICy8r",
+            "memoryArn": "arn:aws:bedrock-agentcore:us-west-2:853249515104:memory/CustomerSupport_SharedMemory-jEAscICy8r"
+          }
+        },
         "stackName": "AgentCore-CustomerSupport-default"
       }
     }
