@@ -1,15 +1,15 @@
-import uuid
 from strands import Agent, tool
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from model.load import load_model
-from mcp_client.client import get_streamable_http_mcp_client
+from mcp_client.client import get_streamable_http_mcp_client, get_gateway_mcp_client
 from memory.session import get_memory_session_manager
+import json
 
 app = BedrockAgentCoreApp()
 log = app.logger
 
-# Exa AI MCP client for web search
-mcp_clients = [get_streamable_http_mcp_client()]
+# MCP clients: Exa AI (web search) + AgentCore Gateway (Lambda tools)
+mcp_clients = [get_streamable_http_mcp_client(), get_gateway_mcp_client()]
 
 SYSTEM_PROMPT="""You are a helpful and professional customer support assistant for an e-commerce company.
 Your role is to:
@@ -106,12 +106,11 @@ def get_or_create_agent(session_id, user_id):
 async def invoke(payload, context):
     log.info("Invoking Agent.....")
 
-    session_id = context.session_id or payload.get('session_id') or str(uuid.uuid4())
-    headers = context.request_headers or {}
-    user_id = (headers.get('x-amzn-bedrock-agentcore-runtime-custom-user-id')
-               or payload.get('user_id', 'default'))
+    session_id = context.session_id
+    user_id = context.request_headers['x-amzn-bedrock-agentcore-runtime-custom-user-id']
 
-    log.info(f"session_id={session_id} user_id={user_id}")
+    if not session_id or not user_id:
+        raise ValueError("session_id and user_id are required. Pass --session-id and --user-id when invoking.")
 
     agent = get_or_create_agent(session_id, user_id)
     stream = agent.stream_async(payload.get("prompt"))
